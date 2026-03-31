@@ -1,4 +1,4 @@
-〰 Wiggly Tube
+
 A translator for Wiggly Tube — its own alphabet made of symbols. Decode Wiggly Tube into plain text, or encode plain text into Wiggly Tube.
 How to use
 
