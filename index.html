@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Wiggly Tube</title>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;600;700&family=Patrick+Hand&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #fdf6e3;
+    --paper: #fffdf5;
+    --border: #c9b99a;
+    --accent: #b85c2a;
+    --accent2: #4a7c59;
+    --text: #3a2e1e;
+    --dim: #9a8a72;
+    --ink: #2e2416;
+    --highlight: #f5e6c8;
+    --shadow: rgba(100, 70, 30, 0.12);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background-color: var(--bg);
+    background-image:
+      repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 27px,
+        #e8d9c040 28px
+      );
+    color: var(--text);
+    font-family: 'Patrick Hand', cursive;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 40px 20px 80px;
+  }
+
+  header {
+    text-align: center;
+    margin-bottom: 36px;
+  }
+
+  header h1 {
+    font-family: 'Caveat', cursive;
+    font-weight: 700;
+    font-size: clamp(2.8rem, 9vw, 5.5rem);
+    color: var(--accent);
+    line-height: 1;
+    letter-spacing: 0.02em;
+    transform: rotate(-1.5deg);
+    display: inline-block;
+    text-shadow: 3px 3px 0px #e8c9a040;
+  }
+
+  header .subtitle {
+    font-family: 'Caveat', cursive;
+    font-size: 1.1rem;
+    color: var(--dim);
+    margin-top: 6px;
+    transform: rotate(0.5deg);
+    display: inline-block;
+  }
+
+  .container {
+    width: 100%;
+    max-width: 820px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .panel {
+    background: var(--paper);
+    border: 2px solid var(--border);
+    border-radius: 6px;
+    padding: 22px 24px;
+    box-shadow: 4px 4px 0px var(--shadow), 0 1px 3px var(--shadow);
+    position: relative;
+  }
+
+  .panel-label {
+    font-family: 'Caveat', cursive;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--accent);
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .panel-label::after {
+    content: '';
+    flex: 1;
+    height: 2px;
+    background: repeating-linear-gradient(
+      to right,
+      var(--border) 0px,
+      var(--border) 6px,
+      transparent 6px,
+      transparent 10px
+    );
+    border-radius: 2px;
+  }
+
+  textarea {
+    width: 100%;
+    background: transparent;
+    border: none;
+    border-bottom: 1.5px dashed var(--border);
+    color: var(--ink);
+    font-family: 'Patrick Hand', cursive;
+    font-size: 1.15rem;
+    line-height: 1.9;
+    resize: vertical;
+    min-height: 110px;
+    outline: none;
+    caret-color: var(--accent);
+    padding-bottom: 6px;
+  }
+
+  textarea::placeholder { color: var(--dim); font-style: italic; }
+
+  .output-text {
+    font-family: 'Caveat', cursive;
+    font-size: 1.5rem;
+    font-weight: 600;
+    line-height: 1.7;
+    min-height: 60px;
+    color: var(--accent2);
+    word-break: break-word;
+    white-space: pre-wrap;
+    border-bottom: 1.5px dashed var(--border);
+    padding-bottom: 6px;
+  }
+
+  .output-text.empty {
+    color: var(--dim);
+    font-size: 1rem;
+    font-family: 'Patrick Hand', cursive;
+    font-weight: 400;
+    font-style: italic;
+  }
+
+  .controls {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    align-items: center;
+    margin-top: 14px;
+  }
+
+  button {
+    font-family: 'Caveat', cursive;
+    font-weight: 600;
+    font-size: 1rem;
+    padding: 6px 18px;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: all 0.12s;
+    border: 2px solid;
+    letter-spacing: 0.02em;
+  }
+
+  .btn-primary {
+    background: var(--accent2);
+    color: #fff;
+    border-color: var(--accent2);
+  }
+  .btn-primary:hover { background: #3a6348; transform: translateY(-2px); box-shadow: 0 3px 0 #2a4a38; }
+  .btn-primary:active { transform: translateY(0); box-shadow: none; }
+
+  .btn-ghost {
+    background: transparent;
+    color: var(--dim);
+    border-color: var(--border);
+  }
+  .btn-ghost:hover { color: var(--text); border-color: var(--dim); background: var(--highlight); }
+
+  .btn-danger {
+    background: transparent;
+    color: #c0553a;
+    border-color: #e8b4a0;
+  }
+  .btn-danger:hover { background: #fbe8e0; }
+
+  .mode-toggle {
+    display: flex;
+    border: 2px solid var(--border);
+    border-radius: 20px;
+    overflow: hidden;
+    background: var(--highlight);
+  }
+
+  .mode-btn {
+    font-family: 'Caveat', cursive;
+    font-size: 0.95rem;
+    font-weight: 600;
+    padding: 5px 16px;
+    cursor: pointer;
+    border: none;
+    background: transparent;
+    color: var(--dim);
+    transition: all 0.15s;
+    border-radius: 20px;
+  }
+
+  .mode-btn.active {
+    background: var(--accent);
+    color: #fff;
+  }
+
+  .stats {
+    font-family: 'Patrick Hand', cursive;
+    font-size: 0.8rem;
+    color: var(--dim);
+    margin-left: auto;
+  }
+
+  .ref-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(116px, 1fr));
+    gap: 7px;
+    margin-top: 4px;
+  }
+
+  .ref-item {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    padding: 5px 9px;
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    background: var(--highlight);
+    cursor: pointer;
+    transition: all 0.1s;
+    user-select: none;
+  }
+
+  .ref-item:hover {
+    border-color: var(--accent);
+    background: #fce9d8;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 0 #e8c4a8;
+  }
+
+  .ref-item:active { transform: scale(0.97); }
+
+  .ref-letter {
+    font-family: 'Caveat', cursive;
+    font-weight: 700;
+    font-size: 1.2rem;
+    color: var(--accent);
+    min-width: 16px;
+    text-align: center;
+  }
+
+  .ref-sep { color: var(--border); font-size: 0.75rem; }
+
+  .ref-sym {
+    font-size: 1rem;
+    color: var(--ink);
+  }
+
+  .section-collapse summary {
+    cursor: pointer;
+    list-style: none;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .section-collapse summary::-webkit-details-marker { display: none; }
+  .chevron { color: var(--dim); font-size: 0.85rem; transition: transform 0.2s; }
+  .section-collapse[open] .chevron { transform: rotate(180deg); }
+
+  .copy-toast {
+    position: fixed;
+    bottom: 28px;
+    right: 24px;
+    background: var(--accent2);
+    color: #fff;
+    font-family: 'Caveat', cursive;
+    font-weight: 700;
+    font-size: 1.1rem;
+    padding: 8px 22px;
+    border-radius: 20px;
+    border: 2px solid #3a6348;
+    opacity: 0;
+    transform: translateY(8px) rotate(-1deg);
+    transition: all 0.22s;
+    pointer-events: none;
+    box-shadow: 3px 3px 0 #2a4a38;
+  }
+  .copy-toast.show { opacity: 1; transform: translateY(0) rotate(-1deg); }
+
+  .panel::before {
+    content: '📎';
+    position: absolute;
+    top: -14px;
+    left: 18px;
+    font-size: 1.4rem;
+    transform: rotate(-20deg);
+    opacity: 0.5;
+  }
+
+  @media (max-width: 500px) {
+    .ref-grid { grid-template-columns: repeat(auto-fill, minmax(95px, 1fr)); }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div><h1>Wiggly Tube</h1></div>
+  <div class="subtitle">a secret symbol translator 〰∿≈</div>
+</header>
+
+<div class="container">
+
+  <div class="panel">
+    <div class="panel-label">
+      <div class="mode-toggle">
+        <button class="mode-btn active" id="modeDecode" onclick="setMode('decode')">decode ↓</button>
+        <button class="mode-btn" id="modeEncode" onclick="setMode('encode')">encode ↑</button>
+      </div>
+    </div>
+
+    <div class="panel-label" id="inputLabel">wiggly tube symbols</div>
+    <textarea id="inputArea" rows="5" placeholder="paste your wiggly symbols here…" oninput="process()"></textarea>
+
+    <div class="controls">
+      <button class="btn-danger" onclick="clearAll()">✕ clear</button>
+      <button class="btn-ghost" onclick="swapIO()">⇅ swap</button>
+      <div class="stats" id="statWords">0 words</div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-label" id="outputLabel">plain text</div>
+    <div class="output-text empty" id="outputArea">your translation will show up here…</div>
+    <div class="controls">
+      <button class="btn-primary" onclick="copyOutput()">copy ✓</button>
+    </div>
+  </div>
+
+  <details class="panel section-collapse" open>
+    <summary>
+      <div class="panel-label" style="flex:1; margin-bottom:0;">
+        the alphabet &nbsp;<span style="color:var(--dim); font-family:'Patrick Hand'; font-size:0.8rem; font-weight:400;">(click any to insert)</span>
+      </div>
+      <span class="chevron">▼</span>
+    </summary>
+    <div style="height:14px;"></div>
+    <div class="ref-grid" id="refGrid"></div>
+  </details>
+
+</div>
+
+<div class="copy-toast" id="toast">copied! ✓</div>
+
+<script>
+const CIPHER = {
+  'A': '~',   'B': "~'",  'C': '~)',  'D': '~|',  'E': '~.',
+  'F': '~:',  'G': '≈',   'H': "≈'",  'I': '≈)',   'J': '≈|',
+  'K': '≈.',  'L': '≈:',  'M': '∿',   'N': "∿'",  'O': '∿)',
+  'P': '∿|',  'Q': '∿.',  'R': '∿:',  'S': '〰',  'T': "〰'",
+  'U': '〰)', 'V': '〰|',  'W': '〰.', 'X': '〰:', 'Y': '⌇~',
+  'Z': '⌇≈'
+};
+
+const DECODE_MAP = [];
+for (const [letter, sym] of Object.entries(CIPHER)) {
+  DECODE_MAP.push([sym, letter]);
+}
+DECODE_MAP.sort((a, b) => b[0].length - a[0].length);
+
+let mode = 'decode';
+
+function setMode(m) {
+  mode = m;
+  document.getElementById('modeDecode').classList.toggle('active', m === 'decode');
+  document.getElementById('modeEncode').classList.toggle('active', m === 'encode');
+  document.getElementById('inputLabel').textContent = m === 'decode' ? 'wiggly tube symbols' : 'plain text';
+  document.getElementById('outputLabel').textContent = m === 'decode' ? 'plain text' : 'wiggly tube symbols';
+  document.getElementById('inputArea').placeholder = m === 'decode'
+    ? 'paste your wiggly symbols here…'
+    : 'type something to encode…';
+  process();
+}
+
+function decode(text) {
+  let result = '', i = 0;
+  while (i < text.length) {
+    if (text[i] === ' ') { result += ' '; i++; continue; }
+    if (text[i] === '\n') { result += '\n'; i++; continue; }
+    if (text[i] === '\r') { i++; continue; }
+    let matched = false;
+    for (const [sym, letter] of DECODE_MAP) {
+      if (text.startsWith(sym, i)) { result += letter; i += sym.length; matched = true; break; }
+    }
+    if (!matched) { result += text[i]; i++; }
+  }
+  return result;
+}
+
+function encode(text) {
+  let result = '';
+  for (const ch of text.toUpperCase()) {
+    if (ch === ' ') { result += ' '; continue; }
+    if (ch === '\n') { result += '\n'; continue; }
+    if (ch === '\r') continue;
+    result += CIPHER[ch] || ch;
+  }
+  return result;
+}
+
+function process() {
+  const raw = document.getElementById('inputArea').value;
+  const out = document.getElementById('outputArea');
+  if (!raw.trim()) {
+    out.textContent = 'your translation will show up here…';
+    out.classList.add('empty');
+    document.getElementById('statWords').textContent = '0 words';
+    return;
+  }
+  const result = mode === 'decode' ? decode(raw) : encode(raw);
+  out.textContent = result;
+  out.classList.remove('empty');
+  const src = mode === 'decode' ? result : raw;
+  const words = src.trim() ? src.trim().split(/\s+/).length : 0;
+  document.getElementById('statWords').textContent = words + ' word' + (words !== 1 ? 's' : '');
+}
+
+function clearAll() {
+  document.getElementById('inputArea').value = '';
+  process();
+}
+
+function swapIO() {
+  const outText = document.getElementById('outputArea').textContent;
+  if (!outText || outText === 'your translation will show up here…') return;
+  document.getElementById('inputArea').value = outText;
+  setMode(mode === 'decode' ? 'encode' : 'decode');
+}
+
+function copyOutput() {
+  const text = document.getElementById('outputArea').textContent;
+  if (!text || text === 'your translation will show up here…') return;
+  navigator.clipboard.writeText(text).then(() => {
+    const t = document.getElementById('toast');
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 1800);
+  });
+}
+
+function buildRef() {
+  const grid = document.getElementById('refGrid');
+  for (const [letter, sym] of Object.entries(CIPHER)) {
+    const el = document.createElement('div');
+    el.className = 'ref-item';
+    el.innerHTML = `<span class="ref-letter">${letter}</span><span class="ref-sep">=</span><span class="ref-sym">${sym}</span>`;
+    el.addEventListener('click', () => {
+      const ta = document.getElementById('inputArea');
+      const s = ta.selectionStart, e = ta.selectionEnd;
+      ta.value = ta.value.slice(0, s) + sym + ta.value.slice(e);
+      ta.selectionStart = ta.selectionEnd = s + sym.length;
+      ta.focus();
+      process();
+    });
+    grid.appendChild(el);
+  }
+}
+
+buildRef();
+</script>
+</body>
+</html>
